@@ -1,8 +1,8 @@
-# AgentStack
+# Stackfidence
 
 **The Rust agent execution substrate. Typed interrupts, causal tracing, deterministic replay, and trust propagation — built in.**
 
-AgentStack is the execution layer for AI agent systems that need to be auditable, recoverable, and safe by construction. It gives you a principled foundation for running agents that you can actually reason about after the fact.
+Stackfidence is the execution layer for AI agent systems that need to be auditable, recoverable, and safe by construction. It gives you a principled foundation for running agents that you can actually reason about after the fact.
 
 ---
 
@@ -10,7 +10,7 @@ AgentStack is the execution layer for AI agent systems that need to be auditable
 
 Most agent runtimes are held together with async callbacks, shared mutable state, and optimism. When something goes wrong — and it will — you have no execution history, no causal chain, no way to reproduce the failure, and no trust boundaries between components.
 
-AgentStack is built for the opposite assumption: agents will fail, need to be interrupted, need to be audited, and need to operate with varying levels of trust across their component graph.
+Stackfidence is built for the opposite assumption: agents will fail, need to be interrupted, need to be audited, and need to operate with varying levels of trust across their component graph.
 
 ---
 
@@ -32,7 +32,7 @@ match agent.run().await {
 Every action an agent takes is stamped with a causal ID linking it to the decision that produced it. You can trace any output back to the exact input, model call, and reasoning step that caused it.
 
 ### Deterministic Replay
-Given an execution log, AgentStack can replay any agent run exactly — same inputs, same tool calls, same outputs. Reproduce bugs, audit decisions, validate fixes.
+Given an execution log, Stackfidence can replay any agent run exactly — same inputs, same tool calls, same outputs. Reproduce bugs, audit decisions, validate fixes.
 
 ### Trust Propagation
 Agents operate within a trust graph. Actions taken by a low-trust component cannot escalate privileges through tool calls or message passing without explicit elevation. Trust is a first-class value, not an afterthought.
@@ -43,11 +43,11 @@ Agents operate within a trust graph. Actions taken by a low-trust component cann
 
 ```toml
 [dependencies]
-agentstack = "0.2"
+stackfidence = "0.2"
 ```
 
 ```rust
-use agentstack::{Agent, Policy, TrustLevel};
+use stackfidence::{Agent, Policy, TrustLevel};
 
 #[tokio::main]
 async fn main() {
