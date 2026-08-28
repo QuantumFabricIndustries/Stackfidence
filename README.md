@@ -1,42 +1,41 @@
-﻿# Stackfidence
+# AgentStack
 
-**The 8-layer agent execution substrate for Rust.**
+**The Rust agent execution substrate. Typed interrupts, causal tracing, deterministic replay, and trust propagation — built in.**
 
-Build AI agent systems you can actually trust â€” with typed interrupts, causal tracing, deterministic replay, budget enforcement, and trust propagation built in from day one.
-
-[![Crates.io](https://img.shields.io/crates/v/stackfidence.svg)](https://crates.io/crates/stackfidence)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
+AgentStack is the execution layer for AI agent systems that need to be auditable, recoverable, and safe by construction. It gives you a principled foundation for running agents that you can actually reason about after the fact.
 
 ---
 
-## Why Stackfidence?
+## The Problem
 
-Every agent framework gives you graphs and loops. That gets you topology and iteration. It doesn't get you a system you can trust in production.
+Most agent runtimes are held together with async callbacks, shared mutable state, and optimism. When something goes wrong — and it will — you have no execution history, no causal chain, no way to reproduce the failure, and no trust boundaries between components.
 
-Stackfidence closes the gaps:
-
-| Layer | What it gives you |
-|---|---|
-| Graph + loops | Topology + iteration |
-| Coordination substrate | Shared blackboard with arbitration |
-| Causal memory | Explainability + deterministic replay |
-| Trust propagation | Safety through call chains |
-| Goal/intent model | Alignment from start to finish |
-| Meta-cognition | Knowing when you're wrong |
-| Resource budget | Graceful degradation |
-| Interrupt model | Structured failure handling |
+AgentStack is built for the opposite assumption: agents will fail, need to be interrupted, need to be audited, and need to operate with varying levels of trust across their component graph.
 
 ---
 
-## Features
+## Core Primitives
 
-- **76 passing tests** â€” 74 unit + 2 integration, zero failures
-- **Deterministic replay** â€” identical blackboard state on re-run, every time
-- **Hard timeouts on human nodes** â€” no graph held hostage by a missing human response
-- **Typed interrupts** â€” `HumanRejected`, `BudgetExceeded`, and more â€” routable, not swallowed
-- **Subgraph recursion** with continuous causal trace across recursion boundaries
-- **8 benchmark groups** â€” linear graph, loop graph, blackboard contention, causal trace, budget, and more
-- **Zero warnings** across debug, release, and LLM feature builds
+### Typed Interrupts
+Every interruption point in an agent's execution is typed. You know *why* execution stopped — policy violation, resource limit, external signal, trust boundary — not just *that* it stopped.
+
+```rust
+match agent.run().await {
+    Ok(result) => handle_result(result),
+    Err(Interrupt::PolicyViolation(policy, ctx)) => audit_log(policy, ctx),
+    Err(Interrupt::TrustBoundary(from, to, action)) => escalate(from, to, action),
+    Err(Interrupt::ResourceLimit(kind, limit)) => backoff(kind, limit),
+}
+```
+
+### Causal Tracing
+Every action an agent takes is stamped with a causal ID linking it to the decision that produced it. You can trace any output back to the exact input, model call, and reasoning step that caused it.
+
+### Deterministic Replay
+Given an execution log, AgentStack can replay any agent run exactly — same inputs, same tool calls, same outputs. Reproduce bugs, audit decisions, validate fixes.
+
+### Trust Propagation
+Agents operate within a trust graph. Actions taken by a low-trust component cannot escalate privileges through tool calls or message passing without explicit elevation. Trust is a first-class value, not an afterthought.
 
 ---
 
@@ -44,53 +43,62 @@ Stackfidence closes the gaps:
 
 ```toml
 [dependencies]
-stackfidence = "0.1.0"
+agentstack = "0.2"
+```
+
+```rust
+use agentstack::{Agent, Policy, TrustLevel};
+
+#[tokio::main]
+async fn main() {
+    let agent = Agent::builder()
+        .trust(TrustLevel::Restricted)
+        .policy(Policy::strict())
+        .tool(web_search)
+        .tool(file_read)
+        .build();
+
+    match agent.run("analyze this codebase").await {
+        Ok(result) => println!("{}", result.output),
+        Err(e) => eprintln!("Interrupted: {:?}", e),
+    }
+}
 ```
 
 ---
 
 ## Architecture
 
-Stackfidence is built on 20 source modules implementing all 13 internal layers:
-
-- **Blackboard** â€” shared coordination substrate with contention handling
-- **Causal trace** â€” full dependency chain for every node execution
-- **Budget engine** â€” token, time, and cost-aware execution
-- **Interrupt propagation** â€” structured failure as a first-class citizen
-- **Trust layer** â€” policy enforcement through agent call chains
-- **Human nodes** â€” with hard worker-thread timeouts
-- **LLM agent** â€” real token usage parsed from the API response
-- **Subgraph executor** â€” recursive with continuous causal trace
-
----
-
-## Benchmarks
-
 ```
-cargo bench
+┌─────────────────────────────────────┐
+│            Agent Runtime            │
+├──────────┬──────────┬───────────────┤
+│  Typed   │  Causal  │     Trust     │
+│Interrupts│  Tracer  │  Propagation  │
+├──────────┴──────────┴───────────────┤
+│         Deterministic Log           │
+├─────────────────────────────────────┤
+│      Tool Execution Sandbox         │
+└─────────────────────────────────────┘
 ```
 
-8 benchmark groups: linear graph, loop graph, blackboard contention,
-blackboard graph, causal trace, budget, input validation, subgraph depth.
+---
+
+## Use Cases
+
+- **Production AI agents** that need audit trails for compliance
+- **Multi-agent systems** where trust between components matters
+- **Agent debugging** — replay failures exactly as they occurred
+- **Policy enforcement** — hard limits on what agents can do
 
 ---
 
-## Licensing
+## Built By
 
-Stackfidence is dual-licensed:
-
-- **Free** for individuals and open source projects (MIT / Apache 2.0)
-- **Commercial license** required for use in proprietary/production systems
-
-For commercial licensing: open an issue or contact via GitHub.
+[Quantum Fabric Industries](https://github.com/QuantumFabricIndustries) — AI infrastructure, cybersecurity tooling, and audio DSP research.
 
 ---
 
-## Status
+## License
 
-Active development. Core substrate is stable and fully tested.
-PHANTOM/SID cognitive architecture integration in progress.
-
----
-
-*Built by [Quantum Fabric Industries](https://github.com/pleggtheking)*
+MIT
