@@ -1,0 +1,51 @@
+[package]
+name = "agent_stack"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT OR Apache-2.0"
+description = "A complete agent orchestration framework: graphs, loops, and the 13 missing layers (coordination, causal memory, trust, goals, meta-cognition, budgets, interrupts, negotiation, replay, input validation, memory decay, human-in-the-loop)."
+homepage = "https://github.com/agents/agentstack"
+repository = "https://github.com/agents/agentstack"
+readme = "README.md"
+keywords = ["agents", "orchestration", "llm", "framework", "graph"]
+categories = ["asynchronous", "concurrency", "data-structures"]
+
+[lib]
+name = "agent_stack"
+path = "src/lib.rs"
+
+[[bin]]
+name = "agentstack"
+path = "src/bin/agentstack.rs"
+
+[features]
+default = []
+# Enable the real LLM HTTP agent (reqwest + tokio). Off by default so the
+# framework runs deterministically with mock agents and zero network deps.
+llm = ["dep:reqwest", "dep:tokio"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+parking_lot = "0.12"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.5", features = ["derive"] }
+thiserror = "1.0"
+
+# Optional, behind the "llm" feature.
+reqwest = { version = "0.12", features = ["json", "blocking"], optional = true, default-features = false }
+tokio = { version = "1.40", features = ["rt-multi-thread", "macros"], optional = true }
+
+[dev-dependencies]
+tempfile = "3.10"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "framework"
+harness = false
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

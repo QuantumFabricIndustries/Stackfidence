@@ -1,0 +1,11 @@
+C:\Users\reven\AgentStack\target\debug\deps\anstyle_parse-7ad5aa46261601f8.d: C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\lib.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\params.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\mod.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\definitions.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\table.rs
+
+C:\Users\reven\AgentStack\target\debug\deps\libanstyle_parse-7ad5aa46261601f8.rlib: C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\lib.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\params.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\mod.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\definitions.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\table.rs
+
+C:\Users\reven\AgentStack\target\debug\deps\libanstyle_parse-7ad5aa46261601f8.rmeta: C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\lib.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\params.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\mod.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\definitions.rs C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\table.rs
+
+C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\lib.rs:
+C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\params.rs:
+C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\mod.rs:
+C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\definitions.rs:
+C:\Users\reven\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\anstyle-parse-1.0.0\src\state\table.rs:

@@ -1,0 +1,1 @@
+std::option::Option<Box<dyn for<'a, 'b> Fn(&'a value::Value, &'b value::Value) -> bool + Send + Sync>>

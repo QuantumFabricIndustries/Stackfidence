@@ -1,0 +1,13 @@
+{
+  "name": "demo",
+  "nodes": [
+    { "label": "start", "agent": "start", "output_slot": "out.start" },
+    { "label": "loop", "agent": "loop", "output_slot": "out.loop", "loop_kind": "repeat", "loop_count": 3 },
+    { "label": "end", "agent": "end", "output_slot": "out.end" }
+  ],
+  "edges": [
+    { "from": "start", "to": "loop" },
+    { "from": "loop", "to": "end" }
+  ],
+  "entry": "start"
+}
