@@ -18,20 +18,22 @@ llm = []
 
 [[bin]]
 name = "stackfidence"
-path = "src/main.rs"
+path = "src/bin/agentstack.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-uuid = { version = "1", features = ["v4"] }
-tokio = { version = "1", features = ["full"] }
+uuid = { version = "1", features = ["v4", "serde"] }
 thiserror = "1"
 chrono = { version = "0.4", features = ["serde"] }
-rand = "0.8"
+parking_lot = "0.12"
+clap = { version = "4", features = ["derive"] }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
 
 [[bench]]
-name = "agent_benchmarks"
+name = "framework"
+path = "benches/framework.rs"
 harness = false
