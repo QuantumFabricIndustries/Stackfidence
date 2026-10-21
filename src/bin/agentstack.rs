@@ -4,10 +4,10 @@
 //! dumps a recorded trace. The spec format is minimal and documented in the
 //! README. Real LLM agents require the `llm` feature and an API key.
 
-use agent_stack::executor::RunConfig;
-use agent_stack::graph::{Edge, EdgeKind, Graph, Node};
-use agent_stack::runtime::Runtime;
-use agent_stack::value::Value;
+use stackfidence::executor::RunConfig;
+use stackfidence::graph::{Edge, EdgeKind, Graph, Node};
+use stackfidence::runtime::Runtime;
+use stackfidence::value::Value;
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -80,18 +80,18 @@ fn build_graph(spec: &Spec) -> Result<Graph, String> {
         }
         if let Some(kind) = &n.loop_kind {
             let ls = match kind.as_str() {
-                "repeat" => agent_stack::loop_spec::LoopSpec::repeat(n.loop_count.unwrap_or(1)),
-                "while" => agent_stack::loop_spec::LoopSpec::while_eq(
+                "repeat" => stackfidence::loop_spec::LoopSpec::repeat(n.loop_count.unwrap_or(1)),
+                "while" => stackfidence::loop_spec::LoopSpec::while_eq(
                     n.loop_slot.clone().unwrap_or_default(),
                     Value::from_json(&n.loop_target.clone().unwrap_or(serde_json::Value::Null)),
                     n.loop_count.unwrap_or(100),
                 ),
-                "until" => agent_stack::loop_spec::LoopSpec::until_eq(
+                "until" => stackfidence::loop_spec::LoopSpec::until_eq(
                     n.loop_slot.clone().unwrap_or_default(),
                     Value::from_json(&n.loop_target.clone().unwrap_or(serde_json::Value::Null)),
                     n.loop_count.unwrap_or(100),
                 ),
-                "foreach" => agent_stack::loop_spec::LoopSpec::foreach(
+                "foreach" => stackfidence::loop_spec::LoopSpec::foreach(
                     n.loop_slot.clone().unwrap_or_default(),
                     n.loop_count.unwrap_or(100),
                 ),
@@ -143,7 +143,7 @@ fn main() {
             // Register identity mock agents for every agent label in the spec
             // so the graph runs out of the box.
             for n in &spec_json.nodes {
-                rt.register(&n.agent, agent_stack::mock_agent::MockAgent::identity(&n.agent));
+                rt.register(&n.agent, stackfidence::mock_agent::MockAgent::identity(&n.agent));
             }
 
             let mut config = RunConfig::default();
@@ -180,7 +180,7 @@ fn main() {
                         println!("  {} = {}", k, v);
                     }
                     if let Some(trace_path) = trace {
-                        let rec = agent_stack::trace_store::TraceRecord::from_trace(&rt.trace);
+                        let rec = stackfidence::trace_store::TraceRecord::from_trace(&rt.trace);
                         if let Err(e) = rec.save(&trace_path) {
                             eprintln!("failed to save trace: {}", e);
                             std::process::exit(1);

@@ -71,13 +71,21 @@ impl Budget {
 
     /// Spend `amount` of `kind`, attributed to `span`. Returns an error if the
     /// cap is exceeded.
+    ///
+    /// Wall-clock (`WallMs`) is special: it is not "spent" by agents; elapsed
+    /// time is read from the internal clock instead. The `amount` argument is
+    /// ignored for `WallMs` — the check always runs so that passing `0` cannot
+    /// silently bypass the limit.
     pub fn spend(&self, kind: ResourceKind, amount: u64, span: SpanId) -> AgentResult<()> {
-        if amount == 0 {
-            return Ok(());
-        }
-        // Special-case wall clock: it's not "spent" by agents, it elapses.
+        // Wall-clock check MUST come before the amount==0 early-return, because
+        // the elapsed time comes from the clock, not from `amount`. A caller that
+        // passes 0 (meaning "trigger the check but spend nothing") must still get
+        // the limit enforced — the previous ordering silently bypassed it.
         if kind == ResourceKind::WallMs {
             return self.check_wall(kind);
+        }
+        if amount == 0 {
+            return Ok(());
         }
         let mut spent = self.spent.lock();
         let total = spent.entry(kind).or_insert(0);
@@ -110,9 +118,12 @@ impl Budget {
         let elapsed = self.start.elapsed().as_millis() as u64;
         let limits = self.limits.lock();
         if let Some(cap) = limits.get(&kind) {
-            if elapsed > *cap {
+            // Use >= so a cap of 0 means "already expired" (the run must complete
+            // within `cap` milliseconds; 0 means it was already over budget at
+            // the instant the Budget was created).
+            if elapsed >= *cap {
                 return Err(AgentError::Budget(format!(
-                    "wall-clock exhausted: {:?}ms > cap {:?}ms",
+                    "wall-clock exhausted: {}ms >= cap {}ms",
                     elapsed, cap
                 )));
             }
@@ -185,6 +196,34 @@ mod tests {
         let s = SpanId::new();
         b.spend(ResourceKind::ApiCalls, 1_000_000, s).unwrap();
         assert!(!b.is_exhausted(ResourceKind::ApiCalls));
+    }
+
+    #[test]
+    fn wall_clock_limit_enforced_even_when_amount_is_zero() {
+        // Bug regression: passing amount=0 used to short-circuit before checking
+        // the wall-clock limit. This test verifies the limit IS checked regardless.
+        let b = Budget::new(vec![BudgetLimit { kind: ResourceKind::WallMs, cap: 0 }]);
+        let s = SpanId::new();
+        // cap=0 means the limit is already exceeded from the first tick.
+        // Passing amount=0 must still check the wall-clock and return an error.
+        let err = b.spend(ResourceKind::WallMs, 0, s).unwrap_err();
+        assert!(
+            matches!(err, AgentError::Budget(_)),
+            "expected Budget error when wall-clock cap is 0, got {:?}",
+            err
+        );
+    }
+
+    #[test]
+    fn wall_clock_limit_passes_within_deadline() {
+        // A generous cap (10 minutes) should not fire immediately.
+        let b = Budget::new(vec![BudgetLimit {
+            kind: ResourceKind::WallMs,
+            cap: 600_000, // 10 minutes
+        }]);
+        let s = SpanId::new();
+        b.spend(ResourceKind::WallMs, 1, s).unwrap();
+        b.spend(ResourceKind::WallMs, 0, s).unwrap(); // also works with amount=0
     }
 
     #[test]

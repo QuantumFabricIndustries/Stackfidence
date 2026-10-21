@@ -302,7 +302,11 @@ impl<'a> GraphExecutor<'a> {
         };
 
         // Budget wall-clock check (layer 7).
-        if let Err(e) = self.rt.budget.spend(crate::budget::ResourceKind::WallMs, 0, SpanId::new()) {
+        // Pass 1 as the amount so the intent is explicit: we want to trigger the
+        // wall-clock limit check on every node invocation. The Budget::spend
+        // implementation ignores the amount for WallMs and reads elapsed time
+        // from the clock directly, so the value does not add to any counter.
+        if let Err(e) = self.rt.budget.spend(crate::budget::ResourceKind::WallMs, 1, SpanId::new()) {
             self.rt.interrupts.raise(
                 Interrupt::new(InterruptKind::BudgetExhausted, format!("{}", e)).with_node(node.id),
             );
@@ -829,6 +833,35 @@ mod tests {
             out.interrupted.as_ref().unwrap().kind,
             crate::error::InterruptKind::HumanRejected
         );
+    }
+
+    #[test]
+    fn wall_clock_budget_kills_run() {
+        use crate::budget::{Budget, BudgetLimit, ResourceKind};
+        use std::sync::Arc;
+
+        // Build a runtime with a WallMs cap of 0ms — already expired at start.
+        // This tests that the executor's per-node wall-clock check actually fires
+        // and stops the run (regression for the amount=0 bypass bug).
+        let mut rt = Runtime::permissive();
+        // Override the budget with a zero-cap wall-clock limit.
+        rt.budget = Arc::new(Budget::new(vec![BudgetLimit {
+            kind: ResourceKind::WallMs,
+            cap: 0,
+        }]));
+
+        rt.register("a", ConstAgent(AgentId::new(), "hello".into()));
+        let mut g = Graph::new("wall-clock-test");
+        let _ = g.add_node(Node::agent("a", "a").with_output_slot("out.a"));
+
+        let out = rt.run(&g, RunConfig::default()).unwrap();
+        // The run must be stopped by the wall-clock budget, not complete normally.
+        assert_ne!(
+            out.status,
+            RunStatus::Completed,
+            "run should have been stopped by wall-clock budget"
+        );
+        assert_eq!(out.status, RunStatus::Interrupted);
     }
 
     #[test]
